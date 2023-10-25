@@ -1,10 +1,12 @@
 * The data is documented in `input/README.md`.
 * TODO
   serial
-** Make "sector, entidad, tipo de gasto" columns.
+** Make "year, sector, entidad, tipo de gasto" columns.
 ** Verify totals.
 ** Make an across-year comparison algorithm.
 *** Use Homologacion.xlsx
+*** Use an inflation series.
+    Present all money values in terms of the later year.
 *** Cliassify entities that move according to their later sector
 *** If an entity disappears, count it in the sector it would be in today.
 *** If a sector disappears, draw it in both phases,
