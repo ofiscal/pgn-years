@@ -4,3 +4,11 @@
   Entidades are partitioned into sectores.
   Gasto has 3 flavors: inversion, funcionamiento, and serv. deuda.
 * The totals can be used as a check; they are redundant.
+* homologacion
+  Red stuff disappeared.
+  Every entity keeps the code it is first assigned,
+  the first two digits of which depend on its sector.
+  Cliassify entities according to the future sector they're in,
+  if they moved.
+  If an entity disappears, count it in the sector it would be in today.
+  If a sector disappears, draw it in both phases, with a budget of zero later.
