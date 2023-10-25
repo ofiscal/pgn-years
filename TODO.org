@@ -1,14 +1,11 @@
-* Ignore renta, use gastos.
-  Each year of "Ley PGN" has a sheet for each of those.
-* Make "sector, entidad, tipo de gasto" columns.
-  Entidades are partitioned into sectores.
-  Gasto has 3 flavors: inversion, funcionamiento, and serv. deuda.
-* The totals can be used as a check; they are redundant.
-* homologacion
-  Red stuff disappeared.
-  Every entity keeps the code it is first assigned,
-  the first two digits of which depend on its sector.
-  Cliassify entities according to the future sector they're in,
-  if they moved.
-  If an entity disappears, count it in the sector it would be in today.
-  If a sector disappears, draw it in both phases, with a budget of zero later.
+* The data is documented in `input/README.md`.
+* TODO
+  serial
+** Make "sector, entidad, tipo de gasto" columns.
+** Verify totals.
+** Make an across-year comparison algorithm.
+*** Use Homologacion.xlsx
+*** Cliassify entities that move according to their later sector
+*** If an entity disappears, count it in the sector it would be in today.
+*** If a sector disappears, draw it in both phases,
+    with a budget of zero later.
