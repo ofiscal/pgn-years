@@ -1,0 +1,6 @@
+* Ignore renta, use gastos.
+  Each year of "Ley PGN" has a sheet for each of those.
+* Make "sector, entidad, tipo de gasto" columns.
+  Entidades are partitioned into sectores.
+  Gasto has 3 flavors: inversion, funcionamiento, and serv. deuda.
+* The totals can be used as a check; they are redundant.
