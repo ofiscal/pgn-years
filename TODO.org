@@ -2,6 +2,25 @@
 * TODO
   serial
 ** Make "year, sector, entidad, tipo de gasto" columns.
+   serial
+*** Extract each sheet to a separate CSV file.
+*** Delete "totales generales".
+**** Mark all strings matching "total".
+**** Verify nothing else matches the string "total".
+**** View them.
+     They should not include any entities or sectors.
+**** Delete them.
+*** Create a "level" column.
+**** Assign level=0 for anything roughly matching
+     funcionamiento, inversion or servicio de la deuda.
+**** list all strings for level=0 and for level missing.
+     The first should look like it includes no sectors or entities,
+     and the latter should look like it only includes those.
+**** Create levels 1 and 2.
+***** Reverse each year.
+***** In each missing level preceded by 0, write a 1.
+***** In each missing level preceded by a 1, write a 2.
+***** Reverse each year (so now back to normal).
 ** Verify totals.
 ** Make an across-year comparison algorithm.
 *** Use Homologacion.xlsx
