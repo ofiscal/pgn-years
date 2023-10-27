@@ -11,8 +11,16 @@ Fortunately, each entity is assigned a code at birth which never changes.
 The first two digits of that code are determined by
 the sector it belongs to at birth.
 
+### PITFALL: Disappearing entities
+
 Red items in `Homologacion.xlsx`
 disappear in the year in which they are red.
+But extracting formatting information from an Excel spreadsheet via Pandas
+is either difficult or impossible, depending on the information in question.
+Therefore I manually added a "deleted" column to both tabs of the spreadsheet.
+Where it is 1, the entity no longer exists starting in that year.
+That is, it is 1 for the first year in which it does *not* exist.
+Otherwise it is missing.
 
 ## Ley_PGN_2013-2022.xlsx
 
