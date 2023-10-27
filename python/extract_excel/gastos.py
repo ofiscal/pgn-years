@@ -11,21 +11,15 @@ input_file = "input/Ley_PGN_2013-2022.xlsx"
 year_range = range ( year_min, year_max + 1 )
 sheet_year_preface = "Ley PGN Gasto " # The trailing space is important.
 
-def mk_sheet_names () -> List [str]:
-  gasto_re = re.compile ( sheet_year_preface + ".*" )
-  sheet_names = [
-    s for str_or_int in ( pd.ExcelFile ( input_file )
-                          . sheet_names )
-    if ( # Since sheet_names can return strings or ints
-         s := str(str_or_int) )
-    if gasto_re.match ( s ) ]
-  return sheet_names
-
-assert ( mk_sheet_names () ==
-         # PTIFALL: mk_sheet_names() is only called in this test --
-         # but later code only makes sense if it passes.
-         [ sheet_year_preface + str(n)
-           for n in year_range ] )
+assert (
+  # PTIFALL: the gasto sheet names read here
+  # are only used in this test --
+  # but later code only makes sense if it passes.
+  lib.read_sheet_names (
+    input_file = input_file,
+    sheet_year_preface = sheet_year_preface, )
+  == [ sheet_year_preface + str(n)
+       for n in year_range ] )
 
 def trim_header ( year : int,
                   df : pd.DataFrame ) -> pd.DataFrame:
