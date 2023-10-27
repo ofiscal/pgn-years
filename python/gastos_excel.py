@@ -47,11 +47,15 @@ Otherwise raise an Exception."""
 def mk_pgn_years () -> Dict [ int, pd.DataFrame ]:
   acc = {}
   for year in year_range:
-    df = trim_header (
-      year = year,
-      df = pd.read_excel (
-        io         = input_file,
-        sheet_name = sheet_year_preface + str(year) ) )
+    df = (
+      trim_header (
+        year = year,
+        df = pd.read_excel (
+          io         = input_file,
+          sheet_name = sheet_year_preface + str(year) ) )
+      . rename ( columns =
+                 { "CONCEPTO"            : "name",
+                   "APROPIACIÓN INICIAL" : "cop" } ) )
     acc [year] = df
   return acc
 
@@ -80,4 +84,4 @@ it mixes sectors, entities and the three kinds of spending
   dfs : Dict [ int, pd.DataFrame ] = \
     mk_pgn_years ()
   verify_column_names ( dfs )
-  return unify ( dfs )
+  return unify ( dfs ) [["year", "name", "cop"]]

@@ -2,7 +2,7 @@
 * TODO
   serial
 ** Ingest Homologacion.xlsx
-** Make "year, sector, entidad, tipo de gasto" columns.
+** Make "year, sector, entidad, tipo de gasto, COP" columns.
    serial
 *** Extract each sheet to a separate CSV file.
 *** Delete "totales generales".
