@@ -63,7 +63,10 @@ def extract_sectors_or_entities (
     df = df [ # If it's missing either of these columns, drop the row.
       (~ df [kind_of_thing          ] . isnull() ) &
       (~ df [kind_of_thing + " name"] . isnull() ) ]
-    df [kind_of_thing] = df [kind_of_thing] . astype (int)
+    df [kind_of_thing] = \
+      df [kind_of_thing ] . astype (int)
+    df [kind_of_thing + " name"] = \
+      df [kind_of_thing + " name"] . str.capitalize ()
     acc [year] = df
   return pd.concat ( acc.values (),
                      axis = "rows" )

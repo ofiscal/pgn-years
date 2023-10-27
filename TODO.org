@@ -1,7 +1,9 @@
 * The data is documented in `input/README.md`.
 * TODO
   serial
-** Ingest Homologacion.xlsx
+** DONE Ingest Homologacion.xlsx
+** TODO NEXT : create "level 2" values from deuda, funcionamiento and inversion, and delete "total general" rows.
+*** PITFALL: If there are three "deuda" matches in a row, they are all the same information, and they have no sector or entity associated; they are totals.
 ** Make "year, sector, entidad, tipo de gasto, COP" columns.
    serial
 *** Extract each sheet to a separate CSV file.
