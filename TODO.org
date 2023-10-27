@@ -1,6 +1,7 @@
 * The data is documented in `input/README.md`.
 * TODO
   serial
+** Ingest Homologacion.xlsx
 ** Make "year, sector, entidad, tipo de gasto" columns.
    serial
 *** Extract each sheet to a separate CSV file.

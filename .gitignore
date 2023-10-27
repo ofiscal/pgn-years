@@ -1,2 +1,4 @@
 git-comment
 .emacs.desktop*
+__pycache__
+*~
