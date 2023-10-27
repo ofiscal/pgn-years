@@ -55,7 +55,7 @@ Those tables mix sectors and entities."""
 def extract_sectors_or_entities (
     tabs : Dict [ int, pd.DataFrame ],
     kind_of_thing : str, # Either the string "entity" or the string "sector"
-) -> Dict [ int, pd.DataFrame ]:
+) -> pd.DataFrame:
   acc = {}
   for year in year_range:
     df = ( tabs [year]
@@ -65,4 +65,5 @@ def extract_sectors_or_entities (
       (~ df [kind_of_thing + " name"] . isnull() ) ]
     df [kind_of_thing] = df [kind_of_thing] . astype (int)
     acc [year] = df
-  return acc
+  return pd.concat ( acc.values (),
+                     axis = "rows" )
