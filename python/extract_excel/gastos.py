@@ -62,8 +62,8 @@ def verify_column_names ( dfs : Dict [ int, pd.DataFrame ] ):
       raise ValueError ( "Column names for year " + str(k) +
                          " do not match those of the first year." )
 
-def unify ( dfs : Dict [ int, pd.DataFrame ]
-            ) -> pd.DataFrame:
+def collect_pgn_years ( dfs : Dict [ int, pd.DataFrame ]
+                       ) -> pd.DataFrame:
   acc = pd.DataFrame ()
   for year in dfs.keys():
     df = dfs [ year ]
@@ -80,4 +80,4 @@ it mixes sectors, entities and the three kinds of spending
   dfs : Dict [ int, pd.DataFrame ] = \
     mk_pgn_years ()
   verify_column_names ( dfs )
-  return unify ( dfs ) [["year", "name", "cop"]]
+  gastos =  collect_pgn_years ( dfs ) [["year", "name", "cop"]]
