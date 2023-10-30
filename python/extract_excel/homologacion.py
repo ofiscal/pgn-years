@@ -30,17 +30,10 @@ def mk_homologacion_years () -> Dict [ int, pd.DataFrame ]:
 Those tables mix sectors and entities."""
   tabs = {}
   for year in year_range:
-    df = (
-      pd.read_excel (
-        io         = input_file,
-        sheet_name = sheet_year_preface + str(year),
-        usecols    = range(0,5), )
-      . rename ( columns = { "Sección"         : "sector",
-                             "Sector"          : "sector name",
-                             "Sección entidad" : "entity",
-                             "Entidad"         : "entity name",
-                             "Deleted"         : "deleted",
-                            } ) )
+    df = pd.read_excel (
+      io         = input_file,
+      sheet_name = sheet_year_preface + str(year),
+      usecols    = range(0,5), )
     df ["year"] = year
     df ["deleted"] = df ["deleted"] . fillna ( 0 ) . astype (int)
     tabs[year] = df
