@@ -82,18 +82,27 @@ def collect_pgn_years ( dfs : Dict [ int, pd.DataFrame ]
                       axis = "rows" )
   return acc
 
-matches_to_level_0_items : List [ Tuple [ str,
-                                          List [ str ] ] ] = [
-  ( "servicio.*deuda", [
-    "SERVICIO DE LA DEUDA PUBLICA NACIONAL",     # to drop (see drop_totals)
-    "SERVICIO DE LA DEUDA PÚBLICA NACIONAL",     # to drop (see drop_totals)
-    "Servicio de la Deuda",               ] ),   # to keep
-  ( "inversi.n",       [ "Inversión"      ] ),   # to keep
-  ( "funcionamiento",  [ "Funcionamiento" ] ), ] # to keep
+if True: # Things to keep. [These are lists because in future data,
+  # the number of matches might expand -- see `verify_string_matches`.]
+  matches_for_atomic_deuda          = ["Servicio de la Deuda"]
+  matches_for_atomic_inversion      = ["Inversión"]
+  matches_for_atomic_funcionamiento = ["Funcionamiento"]
 
-matches_to_total_general : List [ Tuple [ str,
-                                          List [ str ] ] ] = [
-  ( "total.*general",  [ "Total general"  ] ) ]  # to drop (see drop_totals)
+if True: # Things to drop.
+  matches_for_redundant_deuda_totals = [
+    "SERVICIO DE LA DEUDA PUBLICA NACIONAL",
+    "SERVICIO DE LA DEUDA PÚBLICA NACIONAL", ]
+  matches_for_redundant_totales_generales = ["Total general"]
+
+regexes_and_matches : List [ Tuple [ str,
+                                     List [ str ] ] ] = [
+  ( "servicio.*deuda", ( # PITFALL: Matches some things we want,
+                         # and some things we don't.
+                         matches_for_redundant_deuda_totals
+                         + matches_for_atomic_deuda ) ),
+  ( "inversi.n",       matches_for_atomic_inversion      ),
+  ( "funcionamiento",  matches_for_atomic_funcionamiento ),
+  ( "total.*general",  matches_for_redundant_totales_generales    ), ]
 
 def verify_string_matches ( gastos : pd.DataFrame ):
   """This is a safety harness, required because the government
@@ -102,9 +111,9 @@ such that one of them matches one of these regexes.
 That would lead to our treating it the wrong way.
 To avoid such a silent error creeping in via future changes to the data,
 this verifies that the only regex matches are of the kind we intend."""
-  for (regex, matches) in [ *matches_to_level_0_items,
-                            *matches_to_total_general ]:
+  for (regex, matches) in regexes_and_matches:
     if not ( pd.Series ( matches )
+             . sort_values ()
              . equals (
                pd.Series ( gastos [ "name" ]
                            [ gastos["name"]
@@ -121,10 +130,10 @@ this verifies that the only regex matches are of the kind we intend."""
 # using it as a check on the other information.
 def drop_totals ( gastos : pd.DataFrame ) -> pd.DataFrame:
   return gastos [
-    ( ~ gastos [ "name" ] . str.match (
-      "Total general" ) ) &
-    ( ~ gastos [ "name" ] . str.match (
-      "SERVICIO DE LA DEUDA P.BLICA NACIONAL" ) ) ]
+    ( ~ gastos [ "name" ]
+      . isin ( matches_for_redundant_totales_generales ) ) &
+    ( ~ gastos [ "name" ]
+      . isin ( matches_for_redundant_deuda_totals ) ) ]
 
 def mk_gastos () -> pd.DataFrame:
   """Yields a data set with year, name, and COP value.
