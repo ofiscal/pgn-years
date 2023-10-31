@@ -12,9 +12,9 @@
 * TODO
   serial
 ** DONE Ingest Homologacion.xlsx
-** TODO NEXT : create "level 2" values from deuda, funcionamiento and inversion, and delete "total general" rows.
+** DONE NEXT : create "level 2" values from deuda, funcionamiento and inversion, and delete "total general" rows.
 *** PITFALL: If there are three "deuda" matches in a row, they are all the same information, and they have no sector or entity associated; they are totals.
-** Make "year, sector, entidad, tipo de gasto, COP" columns.
+** DONE Make "year, sector, entidad, tipo de gasto, COP" columns.
    serial
 *** Extract each sheet to a separate CSV file.
 *** Delete "totales generales".
@@ -34,7 +34,11 @@
 ***** In each missing level preceded by 0, write a 1.
 ***** In each missing level preceded by a 1, write a 2.
 ***** Reverse each year (so now back to normal).
+** Test data properties.
+   No agency should be in more than three rows.
 ** Verify totals.
+   This requires resurrecting the discarded
+   agency- and sector-level rows from gastos.
 ** Make an across-year comparison algorithm.
 *** Use Homologacion.xlsx
 *** Use an inflation series.

@@ -10,6 +10,11 @@
 # Of those objects we care about,
 # the spending items what I'm calling are level 0,
 # agencies level 1, and sectors level 2.
+#
+# TERMINOLOGY
+# An "item" is, more precisely, an "agency item" --
+# what some specific agency spent on
+# funcionamiento, inversión or deuda (the "items").
 
 import numpy as np
 import pandas as pd
@@ -143,7 +148,7 @@ def drop_redundant_rows ( gastos : pd.DataFrame ) -> pd.DataFrame:
 
 def define_agency_items ( gastos : pd.DataFrame ) -> pd.DataFrame:
   df = gastos.copy () # This looks silly, but without using a copy, setting `gastos = define_agency_items ( gastos)` will trigger the Pandas warning, "A value is trying to be set on a copy of a slice from a DataFrame."
-  df ["is agency item"] = (
+  df ["is item"] = (
     df ["name"]
     . isin ( matches_for_agency_spending )
     . astype ( int ) )
@@ -152,17 +157,17 @@ def define_agency_items ( gastos : pd.DataFrame ) -> pd.DataFrame:
 def identify_agency_and_sector_rows (
     gastos : pd.DataFrame ) -> pd.DataFrame:
   gastos["is agency"] = (
-    ( ( gastos ["is agency item"]                == 0 ) &
-      ( gastos ["is agency item"] . shift ( -1 ) > 0 ) )
+    ( ( gastos ["is item"]                  == 0 ) &
+      ( gastos ["is item"] . shift ( -1 )   >  0 ) )
     . astype ( int ) )
-  gastos["is sector"] = (
-    ( ( gastos ["is agency item"]                == 0 ) &
-      ( gastos ["is agency"]                     == 0 ) &
-      ( gastos ["is agency"] . shift ( -1 )      > 0 ) )
+  gastos["is sector"]                       = (
+    ( ( gastos ["is item"]                  == 0 ) &
+      ( gastos ["is agency"]                == 0 ) &
+      ( gastos ["is agency"] . shift ( -1 ) >  0 ) )
     . astype ( int ) )
 
   if True: # Verify that these three kinds partition the rows.
-    kinds = gastos [[ "is agency item", "is agency", "is sector" ]]
+    kinds = gastos [[ "is item", "is agency", "is sector" ]]
     kinds_sum = kinds . sum ( axis = "columns" )
     assert kinds_sum.min () == 1
     assert kinds_sum.max () == 1
@@ -174,7 +179,7 @@ def define_agency_and_sector (
   gastos = gastos.reset_index () # PITFALL: I don't know why this is needed.
     # It looks like it should not be, but casual inspection reveals that
     # without it the data becomes garbage after the first year.
-  for s in ["sector","agency"]:
+  for s in ["sector","agency","item"]:
     gastos[s] = (
       pd.Series (
         np.where ( # if-then-else
@@ -185,11 +190,22 @@ def define_agency_and_sector (
   return gastos [[ "year",
                    "is sector",
                    "is agency",
-                   "is agency item",
+                   "is item",
                    "name",
                    "sector",
                    "agency",
+                   "item",
                    "cop", ]]
+
+def keep_agency_items (
+    gastos : pd.DataFrame ) -> pd.DataFrame:
+  return ( gastos
+           [ gastos["is item"] == 1 ]
+           [[ "year",
+              "sector",
+              "agency",
+              "item",
+              "cop", ]] )
 
 def mk_gastos () -> pd.DataFrame:
   """Yields a data set with year, name, and COP value.
@@ -202,8 +218,9 @@ it mixes sectors, entities and the three kinds of spending
   gastos =  collect_pgn_years ( dfs ) [["year", "name", "cop"]]
   verify_string_matches ( gastos )
   return (
-    define_agency_and_sector (
-      identify_agency_and_sector_rows (
-        define_agency_items (
-          drop_redundant_rows (
-            gastos ) ) ) ) )
+    keep_agency_items ( # PITFALL: This throws away a lot of information. The stage immediately preceding it, `define_agency_and_sector`, makes it easy to see what's going on.
+      define_agency_and_sector (
+        identify_agency_and_sector_rows (
+          define_agency_items (
+            drop_redundant_rows (
+              gastos ) ) ) ) ) )
