@@ -148,6 +148,26 @@ def define_agency_items ( gastos : pd.DataFrame ) -> pd.DataFrame:
     . astype ( int ) )
   return df
 
+def define_agencies_and_sectors (
+    gastos : pd.DataFrame ) -> pd.DataFrame:
+  gastos["agency"] = (
+    ( ( gastos ["agency item"]                == 0 ) &
+      ( gastos ["agency item"] . shift ( -1 ) > 0 ) )
+    . astype ( int ) )
+  gastos["sector"] = (
+    ( ( gastos ["agency item"]                == 0 ) &
+      ( gastos ["agency"]                     == 0 ) &
+      ( gastos ["agency"] . shift ( -1 )      > 0 ) )
+    . astype ( int ) )
+
+  if True: # Verify that these three kinds partition the rows.
+    kinds = gastos [[ "agency item", "agency", "sector" ]]
+    kinds_sum = kinds . sum ( axis = "columns" )
+    assert kinds_sum.min () == 1
+    assert kinds_sum.max () == 1
+
+  return gastos
+
 def mk_gastos () -> pd.DataFrame:
   """Yields a data set with year, name, and COP value.
 PITFALL: The `name` field is still raw --
@@ -159,6 +179,7 @@ it mixes sectors, entities and the three kinds of spending
   gastos =  collect_pgn_years ( dfs ) [["year", "name", "cop"]]
   verify_string_matches ( gastos )
   return (
-    define_agency_items (
-      drop_redundant_rows (
-        gastos ) ) )
+    define_agencies_and_sectors (
+      define_agency_items (
+        drop_redundant_rows (
+          gastos ) ) ) )
