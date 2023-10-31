@@ -1,7 +1,7 @@
 # PURPOSE: Read, format data from the `gastos` tabs of
 # `input/Ley_PGN_2013-2022.xlsx`.
 #
-# THE "LEVEL" CONCEPT:
+# CHIEF DIFFICULTY: MIXED OBJECTS
 # The original data conflates three kinds of objects of interest as rows:
 # an agency's spending in one of the three spending categories,
 # an agency, and a sector (which contains agencies).
@@ -138,6 +138,14 @@ def drop_redundant_rows ( gastos : pd.DataFrame ) -> pd.DataFrame:
     ( ~ gastos [ "name" ]
       . isin ( matches_for_redundant_deuda_totals ) ) ]
 
+def agency_items ( gastos : pd.DataFrame ) -> pd.DataFrame:
+  df = gastos.copy () # This looks silly, but without using a copy, setting `gastos = agency_items ( gastos)` will trigger the Pandas warning, "A value is trying to be set on a copy of a slice from a DataFrame."
+  df ["agency item"] = (
+    df ["name"]
+    . isin ( matches_for_agency_spending )
+    . astype ( int ) )
+  return df
+
 def mk_gastos () -> pd.DataFrame:
   """Yields a data set with year, name, and COP value.
 PITFALL: The `name` field is still raw --
@@ -148,4 +156,7 @@ it mixes sectors, entities and the three kinds of spending
   verify_column_names ( dfs )
   gastos =  collect_pgn_years ( dfs ) [["year", "name", "cop"]]
   verify_string_matches ( gastos )
-  return drop_redundant_rows ( gastos )
+  return (
+    agency_items (
+      drop_redundant_rows (
+        gastos ) ) )
