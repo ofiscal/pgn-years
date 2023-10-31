@@ -1,5 +1,5 @@
 * The data is documented in `input/README.md`.
-* TODO ? Drop "deleted" agency-years from `input/Homologacion.xlsx`.
+* TODO ?? Drop "deleted" agency-years from `input/Homologacion.xlsx`.
   Currently, if an agency disappears in a year,
   `Homologacion.xlsx` lists that agency in its first year of non-existence,
   as well as all its years of existence,

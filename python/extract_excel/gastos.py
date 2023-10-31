@@ -84,9 +84,12 @@ def collect_pgn_years ( dfs : Dict [ int, pd.DataFrame ]
 
 if True: # Things to keep. [These are lists because in future data,
   # the number of matches might expand -- see `verify_string_matches`.]
-  matches_for_atomic_deuda          = ["Servicio de la Deuda"]
-  matches_for_atomic_inversion      = ["Inversión"]
-  matches_for_atomic_funcionamiento = ["Funcionamiento"]
+  matches_for_agency_deuda          = ["Servicio de la Deuda"]
+  matches_for_agency_inversion      = ["Inversión"]
+  matches_for_agency_funcionamiento = ["Funcionamiento"]
+  matches_for_agency_spending = [ *matches_for_agency_deuda,
+                                  *matches_for_agency_inversion,
+                                  *matches_for_agency_funcionamiento, ]
 
 if True: # Things to drop.
   matches_for_redundant_deuda_totals = [
@@ -98,11 +101,11 @@ regexes_and_matches : List [ Tuple [ str,
                                      List [ str ] ] ] = [
   ( "servicio.*deuda", ( # PITFALL: Matches some things we want,
                          # and some things we don't.
-                         matches_for_redundant_deuda_totals
-                         + matches_for_atomic_deuda ) ),
-  ( "inversi.n",       matches_for_atomic_inversion      ),
-  ( "funcionamiento",  matches_for_atomic_funcionamiento ),
-  ( "total.*general",  matches_for_redundant_totales_generales    ), ]
+                      matches_for_redundant_deuda_totals +
+                      matches_for_agency_deuda ) ),
+  ( "inversi.n",      matches_for_agency_inversion      ),
+  ( "funcionamiento", matches_for_agency_funcionamiento ),
+  ( "total.*general", matches_for_redundant_totales_generales    ), ]
 
 def verify_string_matches ( gastos : pd.DataFrame ):
   """This is a safety harness, required because the government
@@ -119,16 +122,16 @@ this verifies that the only regex matches are of the kind we intend."""
                            [ gastos["name"]
                              . str.match ( ".*" + regex + ".*",
                                            case = False ) ]
-                           . unique() )
+                           . unique () )
                . sort_values ()
-               . reset_index ( drop=True ) ) ):
+               . reset_index ( drop = True ) ) ):
       raise ValueError ( "verify_string_matches(): "
                          + "Unexpected matches found to the regex \""
                          + regex + "\"." )
 
-# TODO: We could keep this information instead,
+# TODO ?? We could keep this information instead,
 # using it as a check on the other information.
-def drop_totals ( gastos : pd.DataFrame ) -> pd.DataFrame:
+def drop_redundant_rows ( gastos : pd.DataFrame ) -> pd.DataFrame:
   return gastos [
     ( ~ gastos [ "name" ]
       . isin ( matches_for_redundant_totales_generales ) ) &
@@ -145,4 +148,4 @@ it mixes sectors, entities and the three kinds of spending
   verify_column_names ( dfs )
   gastos =  collect_pgn_years ( dfs ) [["year", "name", "cop"]]
   verify_string_matches ( gastos )
-  return drop_totals ( gastos )
+  return drop_redundant_rows ( gastos )
