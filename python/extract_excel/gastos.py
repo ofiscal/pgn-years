@@ -140,8 +140,8 @@ def drop_redundant_rows ( gastos : pd.DataFrame ) -> pd.DataFrame:
     ( ~ gastos [ "name" ]
       . isin ( matches_for_redundant_deuda_totals ) ) ]
 
-def agency_items ( gastos : pd.DataFrame ) -> pd.DataFrame:
-  df = gastos.copy () # This looks silly, but without using a copy, setting `gastos = agency_items ( gastos)` will trigger the Pandas warning, "A value is trying to be set on a copy of a slice from a DataFrame."
+def define_agency_items ( gastos : pd.DataFrame ) -> pd.DataFrame:
+  df = gastos.copy () # This looks silly, but without using a copy, setting `gastos = define_agency_items ( gastos)` will trigger the Pandas warning, "A value is trying to be set on a copy of a slice from a DataFrame."
   df ["agency item"] = (
     df ["name"]
     . isin ( matches_for_agency_spending )
@@ -159,6 +159,6 @@ it mixes sectors, entities and the three kinds of spending
   gastos =  collect_pgn_years ( dfs ) [["year", "name", "cop"]]
   verify_string_matches ( gastos )
   return (
-    agency_items (
+    define_agency_items (
       drop_redundant_rows (
         gastos ) ) )
