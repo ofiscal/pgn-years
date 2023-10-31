@@ -11,6 +11,7 @@
 # the spending items what I'm calling are level 0,
 # agencies level 1, and sectors level 2.
 
+import numpy as np
 import pandas as pd
 import re
 from   typing import Dict, List, Set, Tuple
@@ -168,6 +169,28 @@ def identify_agency_and_sector_rows (
 
   return gastos
 
+def define_agency_and_sector (
+    gastos : pd.DataFrame ) -> pd.DataFrame:
+  gastos = gastos.reset_index () # PITFALL: I don't know why this is needed.
+    # It looks like it should not be, but casual inspection reveals that
+    # without it the data becomes garbage after the first year.
+  for s in ["sector","agency"]:
+    gastos[s] = (
+      pd.Series (
+        np.where ( # if-then-else
+          gastos["is " + s] == 1,
+          gastos["name"],
+          np.nan ) )
+      . fillna ( method = "ffill" ) )
+  return gastos [[ "year",
+                   "is sector",
+                   "is agency",
+                   "is agency item",
+                   "name",
+                   "sector",
+                   "agency",
+                   "cop", ]]
+
 def mk_gastos () -> pd.DataFrame:
   """Yields a data set with year, name, and COP value.
 PITFALL: The `name` field is still raw --
@@ -179,7 +202,8 @@ it mixes sectors, entities and the three kinds of spending
   gastos =  collect_pgn_years ( dfs ) [["year", "name", "cop"]]
   verify_string_matches ( gastos )
   return (
-    identify_agency_and_sector_rows (
-      define_agency_items (
-        drop_redundant_rows (
-          gastos ) ) ) )
+    define_agency_and_sector (
+      identify_agency_and_sector_rows (
+        define_agency_items (
+          drop_redundant_rows (
+            gastos ) ) ) ) )
