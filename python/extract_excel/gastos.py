@@ -80,7 +80,9 @@ def collect_pgn_years ( dfs : Dict [ int, pd.DataFrame ]
     df ["year"] = year
     acc = pd.concat ( [ acc, df ],
                       axis = "rows" )
-  return acc
+  return ( acc
+           . reset_index ( # remove duplicate index values
+             drop = True ) )
 
 if True: # Things to keep. [These are lists because in future data,
   # the number of matches might expand -- see `verify_string_matches`.]
