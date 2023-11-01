@@ -25,6 +25,14 @@ assert (
   == [ sheet_year_preface + str(n)
        for n in year_range ] )
 
+def drop_deleted_rows_and_column (
+    df : pd.DataFrame ) -> pd.DataFrame:
+  """Deleted agency/sector information appears to be redundant.
+This drops it."""
+  return ( df . copy ()
+           [ df ["deleted"] == 0 ]
+           . drop ( columns = "deleted" ) )
+
 def mk_homologacion_years () -> Dict [ int, pd.DataFrame ]:
   """This extracts the raw tables from the two tabs of `Homologacion.xlsx`.
 Those tables mix sectors and entities."""
@@ -36,6 +44,7 @@ Those tables mix sectors and entities."""
       usecols    = range(0,5), )
     df ["year"] = year
     df ["deleted"] = df ["deleted"] . fillna ( 0 ) . astype (int)
+    df = drop_deleted_rows_and_column ( df )
     tabs[year] = df
     assert ( # PITFALL: A bit tricky. This assertion depends on two facts:
              # That the first year extracted is `year_min`,
@@ -52,12 +61,15 @@ def extract_sectors_or_entities (
   acc = {}
   for year in year_range:
     df = ( tabs [year]
-           [["year", kind_of_thing, kind_of_thing + " name", "deleted"]] )
+           [["year",
+             kind_of_thing + " code",
+             kind_of_thing + " name",
+             ]] )
     df = df [ # If it's missing either of these columns, drop the row.
-      (~ df [kind_of_thing          ] . isnull() ) &
+      (~ df [kind_of_thing + " code"] . isnull() ) &
       (~ df [kind_of_thing + " name"] . isnull() ) ]
-    df [kind_of_thing] = \
-      df [kind_of_thing ] . astype (int)
+    df [kind_of_thing + " code"] = \
+      df [kind_of_thing + " code" ] . astype (int)
     df [kind_of_thing + " name"] = \
       df [kind_of_thing + " name"] . str.capitalize ()
     acc [year] = df
