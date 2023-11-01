@@ -71,7 +71,7 @@ def extract_sectors_or_entities (
     df [kind_of_thing + " code"] = \
       df [kind_of_thing + " code" ] . astype (int)
     df [kind_of_thing + " name"] = \
-      df [kind_of_thing + " name"] . str.capitalize ()
+      df [kind_of_thing + " name"] . str.upper ()
     acc [year] = df
   return pd.concat ( acc.values (),
                      axis = "rows" )

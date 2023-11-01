@@ -21,8 +21,8 @@ gastos = (
 for (df, field) in [ (sectors,  "sector name" ),
                      (entities, "entity name" ), ]:
   gastos [field + " matched"] = (
-    gastos [field] . str.upper ()
-    . isin ( df [field] . str.upper () )
+    gastos [field]
+    . isin ( df [field] )
     . astype (int) )
 del (df, field)
 
