@@ -18,12 +18,13 @@ gastos = (
     columns = { "sector" : "sector name",
                 "entity" : "entity name" } ) )
 
-for (df, field) in [ (sectors,  "sector name" ),
-                     (entities, "entity name" ), ]:
-  gastos [field + " matched"] = (
-    gastos [field]
-    . isin ( df [field] )
-    . astype (int) )
+for (df, field) in [ (sectors,  "sector" ),
+                     (entities, "entity" ), ]:
+  gastos = gastos.merge (
+    right = df [[ field + " name",
+                  field + " code", ]],
+    how = "left", # important! don't throw anything away if unmatched
+    on = field + " name" )
 del (df, field)
 
 gastos . describe ()
@@ -31,9 +32,7 @@ gastos . describe ()
 # PITFALL: The code below is repetitive.
 # The algorithm for defining `matched` and `unmatched`
 # are extremely similar, except for
-# a series negation symbol (~) in `unmatched`
-# and maybe an upcoming a merge in `matched` (TODO)
-# to include the sector or entity code.
+# a series negation symbol (~) in `matched`.
 # This redundancy could be factored out, but that would only
 # replace the danger that the passages get out of sync
 # with the danger of not understanding the code.
@@ -42,28 +41,26 @@ if True: # isolate matched sectors and entities
   matched = {}
   for level in ["sector", "entity"]:
     matched[level] = (
-      gastos [ gastos [level + " name matched"]
-               . astype ( bool ) ]
+      gastos [ ~ gastos [level + " code"]
+               . isnull () ]
       [[ "year",
          level + " name",
-         level + " name matched" ]] # kept only as a sanity check
+         level + " code" ]]
       . copy ()
       . drop_duplicates () )
-    matched[level] [ level + " code" ] = np.nan
   del (level)
 
 if True: # isolate unmatched sectors and entities
   unmatched = {}
   for level in ["sector", "entity"]:
     unmatched[level] = (
-      gastos [ ~ ( gastos [level + " name matched"]
-                   . astype ( bool ) ) ]
+      gastos [ gastos [level + " code"]
+               . isnull () ]
       [[ "year",
          level + " name",
-         level + " name matched" ]] # kept only as a sanity check
+         level + " code" ]]
       . copy ()
       . drop_duplicates () )
-    unmatched[level] [ level + " code" ] = np.nan
   del (level)
 
 for (df, filename) in [
