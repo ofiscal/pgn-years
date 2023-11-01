@@ -3,17 +3,17 @@
 #
 # CHIEF DIFFICULTY: MIXED OBJECTS
 # The original data conflates three kinds of objects of interest as rows:
-# an agency's spending in one of the three spending categories,
-# an agency, and a sector (which contains agencies).
+# an entity's spending in one of the three spending categories,
+# an entity, and a sector (which contains entities).
 # (It also conflates some totals among those rows,
 # which we don't care about.)
 # Of those objects we care about,
 # the spending items what I'm calling are level 0,
-# agencies level 1, and sectors level 2.
+# entities level 1, and sectors level 2.
 #
 # TERMINOLOGY
-# An "item" is, more precisely, an "agency item" --
-# what some specific agency spent on
+# An "item" is, more precisely, an "entity item" --
+# what some specific entity spent on
 # funcionamiento, inversión or deuda (the "items").
 
 import numpy as np
@@ -92,12 +92,12 @@ def collect_pgn_years ( dfs : Dict [ int, pd.DataFrame ]
 
 if True: # Things to keep. [These are lists because in future data,
   # the number of matches might expand -- see `verify_string_matches`.]
-  matches_for_agency_deuda          = ["Servicio de la Deuda"]
-  matches_for_agency_inversion      = ["Inversión"]
-  matches_for_agency_funcionamiento = ["Funcionamiento"]
-  matches_for_agency_spending = [ *matches_for_agency_deuda,
-                                  *matches_for_agency_inversion,
-                                  *matches_for_agency_funcionamiento, ]
+  matches_for_entity_deuda          = ["Servicio de la Deuda"]
+  matches_for_entity_inversion      = ["Inversión"]
+  matches_for_entity_funcionamiento = ["Funcionamiento"]
+  matches_for_entity_spending = [ *matches_for_entity_deuda,
+                                  *matches_for_entity_inversion,
+                                  *matches_for_entity_funcionamiento, ]
 
 if True: # Things to drop.
   matches_for_redundant_deuda_totals = [
@@ -110,9 +110,9 @@ regexes_and_matches : List [ Tuple [ str,
   ( "servicio.*deuda", ( # PITFALL: Matches some things we want,
                          # and some things we don't.
                       matches_for_redundant_deuda_totals +
-                      matches_for_agency_deuda ) ),
-  ( "inversi.n",      matches_for_agency_inversion      ),
-  ( "funcionamiento", matches_for_agency_funcionamiento ),
+                      matches_for_entity_deuda ) ),
+  ( "inversi.n",      matches_for_entity_inversion      ),
+  ( "funcionamiento", matches_for_entity_funcionamiento ),
   ( "total.*general", matches_for_redundant_totales_generales    ), ]
 
 def verify_string_matches ( gastos : pd.DataFrame ):
@@ -146,40 +146,40 @@ def drop_redundant_rows ( gastos : pd.DataFrame ) -> pd.DataFrame:
     ( ~ gastos [ "name" ]
       . isin ( matches_for_redundant_deuda_totals ) ) ]
 
-def define_agency_items ( gastos : pd.DataFrame ) -> pd.DataFrame:
-  df = gastos.copy () # This looks silly, but without using a copy, setting `gastos = define_agency_items ( gastos)` will trigger the Pandas warning, "A value is trying to be set on a copy of a slice from a DataFrame."
+def define_entity_items ( gastos : pd.DataFrame ) -> pd.DataFrame:
+  df = gastos.copy () # This looks silly, but without using a copy, setting `gastos = define_entity_items ( gastos)` will trigger the Pandas warning, "A value is trying to be set on a copy of a slice from a DataFrame."
   df ["is item"] = (
     df ["name"]
-    . isin ( matches_for_agency_spending )
+    . isin ( matches_for_entity_spending )
     . astype ( int ) )
   return df
 
-def identify_agency_and_sector_rows (
+def identify_entity_and_sector_rows (
     gastos : pd.DataFrame ) -> pd.DataFrame:
-  gastos["is agency"] = (
+  gastos["is entity"] = (
     ( ( gastos ["is item"]                  == 0 ) &
       ( gastos ["is item"] . shift ( -1 )   >  0 ) )
     . astype ( int ) )
   gastos["is sector"]                       = (
     ( ( gastos ["is item"]                  == 0 ) &
-      ( gastos ["is agency"]                == 0 ) &
-      ( gastos ["is agency"] . shift ( -1 ) >  0 ) )
+      ( gastos ["is entity"]                == 0 ) &
+      ( gastos ["is entity"] . shift ( -1 ) >  0 ) )
     . astype ( int ) )
 
   if True: # Verify that these three kinds partition the rows.
-    kinds = gastos [[ "is item", "is agency", "is sector" ]]
+    kinds = gastos [[ "is item", "is entity", "is sector" ]]
     kinds_sum = kinds . sum ( axis = "columns" )
     assert kinds_sum.min () == 1
     assert kinds_sum.max () == 1
 
   return gastos
 
-def define_agency_and_sector (
+def define_entity_and_sector (
     gastos : pd.DataFrame ) -> pd.DataFrame:
   gastos = gastos.reset_index () # PITFALL: I don't know why this is needed.
     # It looks like it should not be, but casual inspection reveals that
     # without it the data becomes garbage after the first year.
-  for s in ["sector","agency","item"]:
+  for s in ["sector","entity","item"]:
     gastos[s] = (
       pd.Series (
         np.where ( # if-then-else
@@ -189,21 +189,21 @@ def define_agency_and_sector (
       . fillna ( method = "ffill" ) )
   return gastos [[ "year",
                    "is sector",
-                   "is agency",
+                   "is entity",
                    "is item",
                    "name",
                    "sector",
-                   "agency",
+                   "entity",
                    "item",
                    "cop", ]]
 
-def keep_agency_items (
+def keep_entity_items (
     gastos : pd.DataFrame ) -> pd.DataFrame:
   return ( gastos
            [ gastos["is item"] == 1 ]
            [[ "year",
               "sector",
-              "agency",
+              "entity",
               "item",
               "cop", ]] )
 
@@ -218,9 +218,9 @@ it mixes sectors, entities and the three kinds of spending
   gastos =  collect_pgn_years ( dfs ) [["year", "name", "cop"]]
   verify_string_matches ( gastos )
   return (
-    keep_agency_items ( # PITFALL: This throws away a lot of information. The stage immediately preceding it, `define_agency_and_sector`, makes it easy to see what's going on.
-      define_agency_and_sector (
-        identify_agency_and_sector_rows (
-          define_agency_items (
+    keep_entity_items ( # PITFALL: This throws away a lot of information. The stage immediately preceding it, `define_entity_and_sector`, makes it easy to see what's going on.
+      define_entity_and_sector (
+        identify_entity_and_sector_rows (
+          define_entity_items (
             drop_redundant_rows (
               gastos ) ) ) ) ) )
