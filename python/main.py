@@ -72,10 +72,14 @@ for (df, filename) in [
 
     # PITFALL | TODO: The next two data sets only make sense if
     # entities and sectors with the same name are in fact the same.
-    (unmatched["sector"] . drop ( columns = "year" ),
-     "unmatched_sectors_yearless"  ),
-    (unmatched["entity"] . drop ( columns = "year" ),
-     "unmatched_entities_yearless" ),
+    ( ( unmatched["sector"]
+        . drop ( columns = "year" )
+        . drop_duplicates () ),
+      "unmatched_sectors_yearless"  ),
+    ( ( unmatched["entity"]
+        . drop ( columns = "year" )
+        . drop_duplicates () ),
+      "unmatched_entities_yearless"  ),
 ]:
   df . to_excel ( filename + ".xlsx",
                   index = False )

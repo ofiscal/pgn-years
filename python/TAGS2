@@ -1,0 +1,20 @@
+
+./extract_excel/gastos.py,99
+input_file28,867
+29
+year_range30,947
+sheet_year_preface31,993
+
+./extract_excel/homologacion.py,99
+input_file14,376
+15
+year_range16,451
+sheet_year_preface17,497
+
+./main.py,80
+tabs10,206
+sectors11,257
+entities12,330
+gastos15,415
+us76,2356
+ue77,2381
