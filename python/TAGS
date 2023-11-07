@@ -1,0 +1,31 @@
+
+lib.py,68
+def sanitize_string_series 4,22
+def remove_tildes_in_series 8,140
+
+extract_excel/lib.py,27
+def read_sheet_names 6,69
+
+extract_excel/gastos.py,360
+def trim_header 43,1383
+def mk_pgn_years 60,2037
+def verify_column_names 75,2467
+def collect_pgn_years 82,2755
+def verify_string_matches 119,4380
+def drop_redundant_rows 143,5541
+def define_entity_items 150,5796
+def identify_entity_and_sector_rows 158,6198
+def define_entity_and_sector 178,6924
+def keep_entity_items 201,7705
+def mk_gastos 211,7949
+
+extract_excel/homologacion.py,117
+def drop_deleted_rows_and_column 29,855
+def mk_homologacion_years 37,1117
+def extract_sectors_or_entities 58,1936
+
+main.py,0
+
+__init__.py,0
+
+TAGS2,include
