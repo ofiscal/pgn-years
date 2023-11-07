@@ -21,7 +21,8 @@ import pandas as pd
 import re
 from   typing import Dict, List, Set, Tuple
 #
-import python.extract_excel.lib as lib
+import python.extract_excel.lib as extract_excel
+import python.lib               as lib
 
 
 input_file = "input/Ley_PGN_2013-2022.xlsx"
@@ -33,7 +34,7 @@ assert (
   # PTIFALL: the gasto sheet names read here
   # are only used in this test --
   # but later code only makes sense if it passes.
-  lib.read_sheet_names (
+  extract_excel.read_sheet_names (
     input_file = input_file,
     sheet_year_preface = sheet_year_preface, )
   == [ sheet_year_preface + str(n)
@@ -217,10 +218,19 @@ it mixes sectors, entities and the three kinds of spending
   verify_column_names ( dfs )
   gastos =  collect_pgn_years ( dfs ) [["year", "name", "cop"]]
   verify_string_matches ( gastos )
-  return (
+  gastos = (
     keep_entity_items ( # PITFALL: This throws away a lot of information. The stage immediately preceding it, `define_entity_and_sector`, makes it easy to see what's going on.
       define_entity_and_sector (
         identify_entity_and_sector_rows (
           define_entity_items (
             drop_redundant_rows (
-              gastos ) ) ) ) ) )
+              gastos ) ) ) ) )
+    . rename ( # for consistency with `sectors` and `entities`
+               # data sets from `python.extract_excel.homologacion`
+      columns = { "sector" : "sector name",
+                  "entity" : "entity name" } ) )
+  for column_name in ["sector name", "entity name"]:
+    gastos [ column_name ] = \
+      lib . sanitize_string_series (
+        gastos [ column_name ] )
+  return gastos

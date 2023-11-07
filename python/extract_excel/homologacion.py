@@ -7,7 +7,8 @@ import pandas as pd
 import re
 from   typing import Dict, List, Set
 #
-import python.extract_excel.lib as lib
+import python.extract_excel.lib as extract_excel
+import python.lib               as lib
 
 
 input_file = "input/Homologacion.xlsx"
@@ -19,7 +20,7 @@ assert (
   # PTIFALL: the homologacion sheet names read here
   # are only used in this test --
   # but later code only makes sense if it passes.
-  lib.read_sheet_names (
+  extract_excel.read_sheet_names (
     input_file = input_file,
     sheet_year_preface = sheet_year_preface, )
   == [ sheet_year_preface + str(n)
@@ -71,7 +72,8 @@ def extract_sectors_or_entities (
     df [kind_of_thing + " code"] = \
       df [kind_of_thing + " code" ] . astype (int)
     df [kind_of_thing + " name"] = \
-      df [kind_of_thing + " name"] . str.upper ()
+      lib . sanitize_string_series (
+        df [kind_of_thing + " name"] )
     acc [year] = df
   return pd.concat ( acc.values (),
                      axis = "rows" )

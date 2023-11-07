@@ -12,11 +12,7 @@ sectors  = homologacion . extract_sectors_or_entities ( tabs, "sector" )
 entities = homologacion . extract_sectors_or_entities ( tabs, "entity" )
 del (tabs)
 
-gastos = (
-  excel_gastos . mk_gastos ()
-  . rename ( # for consistency with `sectors` and `entities` data sets
-    columns = { "sector" : "sector name",
-                "entity" : "entity name" } ) )
+gastos = excel_gastos . mk_gastos ()
 
 for (df, field) in [ (sectors,  "sector" ),
                      (entities, "entity" ), ]:
@@ -47,7 +43,8 @@ if True: # isolate matched sectors and entities
          level + " name",
          level + " code" ]]
       . copy ()
-      . drop_duplicates () )
+      . drop_duplicates ()
+      . sort_values ( [ level + " name", "year" ] ) )
   del (level)
 
 if True: # isolate unmatched sectors and entities
@@ -60,17 +57,29 @@ if True: # isolate unmatched sectors and entities
          level + " name",
          level + " code" ]]
       . copy ()
-      . drop_duplicates () )
+      . drop_duplicates ()
+      . sort_values ( [ level + " name", "year" ] ) )
   del (level)
 
 for (df, filename) in [
-    (sectors,              "sectors"            ),
-    (entities,             "entities"           ),
-    (gastos,               "gastos"             ),
-    (matched["sector"],    "matched_sectors"    ),
-    (matched["entity"],    "matched_entities"   ),
-    (unmatched["sector"],  "unmatched_sectors"  ),
-    (unmatched["entity"],  "unmatched_entities" ), ]:
-  df.to_excel ( filename + ".xlsx",
-                index = False )
+    (sectors,               "sectors"            ),
+    (entities,              "entities"           ),
+    (gastos,                "gastos"             ),
+    (matched["sector"],     "matched_sectors"    ),
+    (matched["entity"],     "matched_entities"   ),
+    (unmatched["sector"],   "unmatched_sectors"  ),
+    (unmatched["entity"],   "unmatched_entities" ),
+
+    # PITFALL | TODO: The next two data sets only make sense if
+    # entities and sectors with the same name are in fact the same.
+    (unmatched["sector"] . drop ( columns = "year" ),
+     "unmatched_sectors_yearless"  ),
+    (unmatched["entity"] . drop ( columns = "year" ),
+     "unmatched_entities_yearless" ),
+]:
+  df . to_excel ( filename + ".xlsx",
+                  index = False )
 del(df, filename)
+
+# us = unmatched["sector"]
+# ue = unmatched["entity"]
